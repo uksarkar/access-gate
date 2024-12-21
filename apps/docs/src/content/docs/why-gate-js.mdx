@@ -1,0 +1,57 @@
+---
+title: Why @gate/js?
+hide_breadcrumbs: true
+---
+
+When building modern applications, implementing role-based access control (RBAC) and managing permissions can become complex, especially when handling scenarios like:
+
+    Defining granular access rules for various entities (e.g., posts, videos).
+    Applying global or contextual restrictions (e.g., admin-only actions).
+    Supporting both synchronous and asynchronous operations.
+    Maintaining clean, reusable, and testable code for permission management.
+
+`@gate/js` addresses these challenges with a powerful yet flexible approach, offering:
+
+## Key Advantages
+
+    - ### Granular Policies:
+        - Define fine-tuned access rules for specific actions on resources.
+
+        ```ts
+        const postPolicy = new Policy("post");
+        postPolicy.define("update", (user, post) => user.id === post.authorId);
+        ```
+    - ### Guards for Contextual Control:
+        - Apply global or entity-specific restrictions effortlessly.
+        ```ts
+        gate.guard((user) => user.isAdmin); // Global guard
+        gate.lazyGuard((user, post) => user.id === post.authorId); // Lazy guard
+        ```
+    - ### Support for Async Logic:
+        - Handle asynchronous operations like database lookups or API calls with asyncLazyGuard.
+        ```ts
+        gate.asyncLazyGuard(async (user, post) => {
+            const isOwner = await checkOwnership(user.id, post.id);
+            return isOwner;
+        });
+        ```
+    - ### Lightweight & Performant:
+        - Built with a focus on speed and simplicity, leveraging modern JavaScript/TypeScript features.
+
+    - ### Flexible API:
+        - Intuitive and type-safe API for effortless integration into any JavaScript or TypeScript project.
+
+    - ### Advanced Features:
+        - Dependency injection for guards.
+        - Comprehensive TypeScript typings.
+
+## When Should You Use `@gate/js`?
+    - Multi-role Applications: Applications with users in roles like admin, editor, or viewer.
+    - Granular Permissions: When actions require fine-grained control (e.g., a user can edit their own posts but not others).
+    - Asynchronous Decision Making: Use cases where access decisions rely on external APIs or databases.
+
+## When Shouldn't You Use It?
+    - If you only need very basic RBAC without guards or policies.
+    - If you're building a small app with no complex permission requirements.
+
+

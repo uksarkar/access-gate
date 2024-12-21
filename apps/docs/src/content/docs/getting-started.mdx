@@ -1,0 +1,43 @@
+---
+title: Getting Started
+hide_breadcrumbs: true
+---
+
+**_@gate/js_** makes it easy to define, manage, and evaluate role-based access control (RBAC) in your applications. Follow these steps to get started:
+
+## Installation
+
+Install the library via npm or yarn:
+```bash
+npm install @gate/js
+# or
+yarn add @gate/js
+```
+
+## Basic Usage
+To start using **_@gate/js_**, you need to create a Gate instance, define policies, and evaluate decisions.
+```ts
+import { Gate, Policy } from "@gate/js";
+
+// Create a new Gate instance
+const gate = new Gate();
+
+// Define a policy for managing posts
+const postPolicy = new Policy("post");
+postPolicy.define("update", (user, post) => user.id === post.authorId);
+
+// Add the policy to the Gate
+gate.addPolicy(postPolicy);
+
+// Create a representative for the current user
+const representative = gate.build({ id: 1 });
+
+// Check if the user can update the post
+const decision = representative.access("post", "update").can({ authorId: 1 });
+console.log(decision); // true
+```
+
+## Next Steps
+- Learn about [Core Concepts](/api/core-concepts) such as **_Policies_**, **_Guards_**, **_Decisions_**, and **_Representatives_**.
+- Explore the [API Reference](/api) to dive deeper into the library's functionality.
+- Check out [Examples](/examples) for real-world usage scenarios.

@@ -1,0 +1,115 @@
+---
+title: "Core Concepts"
+hide_breadcrumbs: true
+---
+import Callout from "@/components/Callout.astro";
+
+To effectively use **_@gate/js_**, it’s essential to understand the core building blocks of the library. These concepts work together to provide a robust and flexible role-based access control (RBAC) system.
+
+ ## 1. Gate
+
+The Gate is the central hub that manages policies and guards. It acts as a container for all access control rules.
+
+### Key Responsibilities
+    - Store and manage policies.
+    - Register and evaluate guards.
+    - Create Representative instances to evaluate decisions.
+
+**Example**
+```ts
+import { Gate } from "@gate/js";
+
+const gate = new Gate();
+
+// Add policies and guards to the gate
+gate.addPolicy(postPolicy);
+gate.guard((user) => user.isAdmin);
+```
+
+## 2. Policies
+
+A Policy defines a set of rules (or actions) for a specific resource. Each action in a policy represents an operation that can be performed, such as "view", "update", or "delete".
+
+### Key Methods
+    - `define(action: string, fn: (user, entity) => boolean)`: Defines a rule for an action.
+    - `can(action: string)`: Evaluates if an action is permitted.
+
+**Example**
+```ts
+import { Policy } from "@gate/js";
+
+// Define a policy for posts
+const postPolicy = new Policy("post");
+
+// Define rules for actions
+postPolicy.define("view", () => true); // Anyone can view
+postPolicy.define("update", (user, post) => user.id === post.authorId); // Only the owner can update
+```
+## 3. Guards
+
+Guards enforce global or contextual restrictions. They work alongside policies to add an extra layer of access control.
+### Types of Guards
+    - **Global Guards**: Applied to all actions and entities globally and have access only to the **representative**.
+    ```ts
+    gate.guard((user) => user.isAdmin);
+    ```
+    - **Lazy Guards**: Applied to specific entities during the call of `can()` method, and have access to **representative** and the **entity**.
+    ```ts
+    gate.lazyGuard((user, post) => user.id === post.authorId);
+    ```
+
+### Async Guards
+Guards can also handle asynchronous logic, it's similar to the global guards.
+
+<Callout variant="warning" title="Caution!">
+Async guards should use with async builder otherwise it'll not be respected, see API reference section for more details.
+</Callout>
+
+```ts
+gate.asyncLazyGuard(async (user, post) => {
+  const isOwner = await checkOwnership(user.id, post.id);
+  return isOwner;
+});
+
+// build the gate using async builder
+const representative = await gate.asyncBuild();
+```
+
+## 4. Decisions
+
+A Decision object represents the result of evaluating policies and guards. It allows you to check whether an action is permitted.
+
+### Key Methods
+
+    `can()`: Evaluates a synchronous decision.
+    `could()`: Evaluates an asynchronous decision.
+
+**Example**
+```ts
+const decision = representative.access("post", "update").can({ authorId: 1 });
+console.log(decision); // true or false
+
+const asyncDecision = await representative
+  .access("post", "update")
+  .could({ authorId: 2 });
+console.log(asyncDecision); // true or false
+```
+
+## 5. Representative
+
+A **_Representative_** evaluates decisions for a specific `user`. It uses `policies` and `guards` registered in the `Gate`.
+
+**Example**
+```ts
+const representative = gate.build({ id: 1, role: "user" });
+
+const decision = representative.access("post", "view").can();
+console.log(decision); // true or false based on policies and guards
+```
+
+## How These Concepts Work Together
+    - Define **_Policies_** for resources and actions.
+    - Register **_Guards_** for global or entity-specific restrictions.
+    - Use the **_Gate_** to manage policies and guards.
+    - Create a **_Representative_** for the current user.
+    - Evaluate **_Decisions_** to check access.
