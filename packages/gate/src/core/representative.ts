@@ -1,7 +1,7 @@
-import Decision from "./decision";
-import type { Gate } from "./gate";
-import { isUndefined } from "../helpers/util";
-import { Policy } from "./policy";
+import Decision from "./decision.js";
+import type { Gate } from "./gate.js";
+import { isUndefined } from "../helpers/util.js";
+import { Policy } from "./policy.js";
 
 export class Representative<
   P extends Record<string, string[]>,

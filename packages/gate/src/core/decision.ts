@@ -1,9 +1,9 @@
 import {
   evaluateAsyncGuards,
   evaluateGuards
-} from "../helpers/guard-evaluator";
-import { isUndefined } from "../helpers/util";
-import { AsyncLazyGuard, LazyGuard } from "../types/guard";
+} from "../helpers/guard-evaluator.js";
+import { isUndefined } from "../helpers/util.js";
+import type { AsyncLazyGuard, LazyGuard } from "../types/guard.js";
 
 export default class Decision {
   private readonly _has_action: boolean;

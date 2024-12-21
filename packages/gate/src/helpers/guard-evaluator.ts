@@ -1,4 +1,4 @@
-import { AsyncGuard, AsyncLazyGuard, Guard, LazyGuard } from "../types";
+import type { AsyncGuard, AsyncLazyGuard, Guard, LazyGuard } from "../types/guard.js";
 
 type Injector = (name: string, dep: unknown) => void;
 

@@ -1,8 +1,8 @@
-import { Policy } from "./core/policy";
+import { Policy } from "./core/policy.js";
 
-export * from "./core/gate";
-export * from "./core/policy";
-export * from "./types/guard";
+export * from "./core/gate.js";
+export * from "./core/policy.js";
+export * from "./types/guard.js";
 
 export const createPolicy = <
   T extends string,

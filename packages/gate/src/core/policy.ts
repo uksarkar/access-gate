@@ -1,4 +1,4 @@
-import { GuardContainer } from "./guard-registry";
+import { GuardContainer } from "./guard-registry.js";
 
 export class Policy<T extends string> extends GuardContainer {
   private _actions: Record<T, <Arg>(...args: Arg[]) => boolean>;

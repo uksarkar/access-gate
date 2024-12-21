@@ -1,7 +1,7 @@
-import { GuardContainer } from "./guard-registry";
-import { isUndefined } from "../helpers/util";
-import { Policy } from "./policy";
-import { Representative } from "./representative";
+import { GuardContainer } from "./guard-registry.js";
+import { isUndefined } from "../helpers/util.js";
+import { Policy } from "./policy.js";
+import { Representative } from "./representative.js";
 
 export class Gate<P extends Record<string, string[]>> extends GuardContainer {
   private _policies: { [K in keyof P]: Policy<P[K][number]> } = {} as any;

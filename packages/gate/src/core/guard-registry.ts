@@ -1,8 +1,8 @@
-import { AsyncGuard, AsyncLazyGuard, Guard, LazyGuard } from "../types/guard";
+import type { AsyncGuard, AsyncLazyGuard, Guard, LazyGuard } from "../types/guard.js";
 import {
   evaluateAsyncGuards,
   evaluateGuards
-} from "../helpers/guard-evaluator";
+} from "../helpers/guard-evaluator.js";
 
 export abstract class GuardContainer {
   private _guards: Guard[] = [];
