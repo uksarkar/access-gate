@@ -1,0 +1,24 @@
+import { defineConfig } from "tsup";
+
+export default defineConfig([
+  {
+    entry: ["src/index.ts"],
+    format: ["esm", "cjs"],
+    sourcemap: true,
+    clean: true,
+    dts: true,
+    minify: false,
+    outExtension: ({ format }) =>
+      format === "esm" ? { js: ".mjs" } : { js: ".js" }
+  },
+  {
+    entry: ["src/index.ts"],
+    format: ["esm", "cjs"],
+    sourcemap: true,
+    clean: false,
+    dts: false,
+    minify: true,
+    outExtension: ({ format }) =>
+      format === "esm" ? { js: ".min.mjs" } : { js: ".min.js" }
+  }
+]);
