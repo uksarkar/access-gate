@@ -96,7 +96,7 @@ export default class Decision {
       this._conclusion = this._allow_default;
     } else {
       this._conclusion = this.restriction.call(
-        { provide: (name: string) => this._dependencies?.[name] },
+        { inject: (name: string) => this._dependencies?.[name] },
         this._representative,
         entity,
         ...args
