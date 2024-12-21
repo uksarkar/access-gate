@@ -1,0 +1,42 @@
+{
+  "name": "@gate/js",
+  "description": "A powerful and flexible role-based access control (RBAC) library for modern JavaScript and TypeScript applications. Supports guards, policies, and advanced async capabilities for granular access control.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uksarkar/gate-js"
+  },
+  "keywords": [
+    "rbac",
+    "access control",
+    "authorization",
+    "guards",
+    "policies",
+    "async guards",
+    "role-based access control",
+    "typescript",
+    "javascript",
+    "permission management"
+  ],
+  "author": "Utpal Sarkar <connect@utpal.io>",
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5",
+    "turbo": "^2.3.3",
+    "typescript": "5.5.4"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "yarn@1.22.22",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
