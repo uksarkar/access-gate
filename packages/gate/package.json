@@ -20,7 +20,7 @@
     "permission management"
   ],
   "author": "Utpal Sarkar <connect@utpal.io>",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "scripts": {
     "test": "vitest",
