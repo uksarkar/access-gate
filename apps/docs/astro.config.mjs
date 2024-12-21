@@ -8,6 +8,7 @@ import mdx from "@astrojs/mdx";
 export default defineConfig({
   site: "https://uksarkar.github.io/gate-js",
   output: "static",
+  base: '/gate-js/',
   markdown: {
     smartypants: true,
     syntaxHighlight: "shiki",
