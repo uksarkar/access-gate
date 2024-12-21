@@ -1,34 +1,58 @@
-name: Deploy Astro Docs to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches:
       - master
 
+  # Allow manual deployment via the GitHub Actions UI
+  workflow_dispatch:
+
 jobs:
   build:
-    name: Build and Deploy Docs
+    name: Build and Deploy
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
     steps:
+      # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Set up Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 22
-          cache: 'yarn'
 
+      # Install dependencies
       - name: Install dependencies
+        working-directory: apps/docs
         run: yarn install --frozen-lockfile
 
+      # Build the Astro documentation app
       - name: Build the documentation app
         working-directory: apps/docs
         run: yarn build
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      # Upload the build output for deployment
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: apps/docs/dist
+          path: apps/docs/dist 
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Deploy
+        uses: actions/deploy-pages@v2
