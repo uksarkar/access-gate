@@ -4,7 +4,7 @@ hide_breadcrumbs: true
 ---
 import Callout from "@/components/Callout.astro";
 
-To effectively use **_@gate/js_**, it’s essential to understand the core building blocks of the library. These concepts work together to provide a robust and flexible role-based access control (RBAC) system.
+To effectively use **_access-gate_**, it’s essential to understand the core building blocks of the library. These concepts work together to provide a robust and flexible role-based access control (RBAC) system.
 
  ## 1. Gate
 
@@ -17,7 +17,7 @@ The Gate is the central hub that manages policies and guards. It acts as a conta
 
 **Example**
 ```ts
-import { Gate } from "@gate/js";
+import { Gate } from "access-gate";
 
 const gate = new Gate();
 
@@ -36,7 +36,7 @@ A Policy defines a set of rules (or actions) for a specific resource. Each actio
 
 **Example**
 ```ts
-import { Policy } from "@gate/js";
+import { Policy } from "access-gate";
 
 // Define a policy for posts
 const postPolicy = new Policy("post");

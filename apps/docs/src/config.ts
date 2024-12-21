@@ -4,7 +4,7 @@ export const SITE = {
   website: "https://utpal.io", // replace this with your deployed domain
   author: "uksarkar",
   desc: "A powerful and flexible role-based access control (RBAC) library for modern JavaScript and TypeScript applications. Supports guards, policies, and advanced async capabilities for granular access control.",
-  title: "@gate/js",
+  title: "AccessGate",
   ogImage: "og-image.png",
   repo: "https://github.com/uksarkar/gate-js",
 };

@@ -1,4 +1,4 @@
-# @gate/js
+# access-gate
 
 A powerful and flexible role-based access control (RBAC) library for modern JavaScript and TypeScript applications.
 
@@ -14,14 +14,14 @@ A powerful and flexible role-based access control (RBAC) library for modern Java
 Install the package via npm or yarn:
 
 ```bash
-npm install @gate/js
+npm install access-gate
 # or
-yarn add @gate/js
+yarn add access-gate
 ```
 
 ### 1. Import the Library
 ```ts
-import { Gate, Policy } from "@gate/js";
+import { Gate, Policy } from "access-gate";
 
 const gate = new Gate();
 
