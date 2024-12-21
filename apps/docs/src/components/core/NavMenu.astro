@@ -10,7 +10,7 @@ const pathname_part = pathname.split("/")[1];
 <div class="flex gap-4">
   {
     menu_items.map((item) => (
-      <a href={item.href}>
+      <a href={`/gate-js${item.href}`}>
         <Button
           variant={
             "/" + pathname_part === "/" + item.href.split("/")[1]

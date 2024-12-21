@@ -26,7 +26,7 @@ const { class: className } = Astro.props;
         breadcrumbs.map((breadcrumb, index) => (
           <BreadcrumbItem>
             {index < breadcrumbs.length - 1 ? (
-              <BreadcrumbLink href={breadcrumb.link} className="no-underline">
+              <BreadcrumbLink href={`/gate-js${breadcrumb.link}`} className="no-underline">
                 {breadcrumb.title}
               </BreadcrumbLink>
             ) : (

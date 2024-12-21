@@ -23,7 +23,7 @@ const { class: className } = Astro.props;
     class="flex space-x-4 justify-between items-center md:items-center md:space-x-0 md:max-w-8xl"
   >
     <div class="font-bold flex flex-row items-center">
-      <a href="/" class="px-4 hidden md:flex no-underline">
+      <a href="/gate-js" class="px-4 hidden md:flex no-underline">
         <Button
           client:load
           className="flex gap-2 hover:no-underline text-2xl"
@@ -33,7 +33,7 @@ const { class: className } = Astro.props;
           {SITE.title}
         </Button>
       </a>
-      <a href="/" class="px-4 flex md:hidden">
+      <a href="/gate-js" class="px-4 flex md:hidden">
         <Button client:load className="" variant="ghost" size="icon">
           <img src="/gate-js/logo.svg" alt="Logo" class="w-[2rem] h-[2rem]" />
         </Button>
