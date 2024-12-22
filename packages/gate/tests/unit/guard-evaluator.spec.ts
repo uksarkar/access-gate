@@ -1,4 +1,4 @@
-import { assert, describe, expect, it } from "vitest";
+import { assert, describe, it } from "vitest";
 import {
   evaluateAsyncGuards,
   evaluateGuards
@@ -124,6 +124,46 @@ describe("Evaluate global guards", () => {
         : evaluateGuards(guards, representative, (name: string, v: unknown) => {
             resultingDep[name] = v;
           });
+
+      assert.equal(expect, evaluated);
+      assert.deepEqual(resultingDep, expectDependencies);
+    });
+  });
+});
+
+describe("Evaluate async global guards", async () => {
+  Object.entries(globalGuards).forEach(([key, obj]) => {
+    const {
+      dependencies,
+      expect,
+      expectDependencies = {},
+      guards,
+      representative,
+      entity
+    } = obj as unknown as Record<string, any>;
+    it(`Async: ${key}`, async () => {
+      const resultingDep = dependencies || {};
+      const asyncGuards = guards.map(
+        (g: (...args: unknown[]) => void) =>
+          (...args: unknown[]) =>
+            Promise.resolve(g(...args))
+      );
+      const evaluated = await (!isUndefined(entity)
+        ? evaluateAsyncGuards(
+            asyncGuards,
+            representative,
+            entity,
+            (name: string, v: unknown) => {
+              resultingDep[name] = v;
+            }
+          )
+        : evaluateAsyncGuards(
+            asyncGuards,
+            representative,
+            (name: string, v: unknown) => {
+              resultingDep[name] = v;
+            }
+          ));
 
       assert.equal(expect, evaluated);
       assert.deepEqual(resultingDep, expectDependencies);
