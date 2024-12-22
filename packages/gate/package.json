@@ -10,12 +10,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/uksarkar/gate-js"
+    "url": "https://github.com/uksarkar/access-gate"
   },
   "bugs": {
-    "url": "https://github.com/uksarkar/gate-js/issues"
+    "url": "https://github.com/uksarkar/access-gate/issues"
   },
-  "homepage": "https://uksarkar.github.io/gate-js/",
+  "homepage": "https://uksarkar.github.io/access-gate/",
   "keywords": [
     "rbac",
     "access control",

@@ -6,7 +6,7 @@ export const SITE = {
   desc: "A powerful and flexible role-based access control (RBAC) library for modern JavaScript and TypeScript applications. Supports guards, policies, and advanced async capabilities for granular access control.",
   title: "AccessGate",
   ogImage: "og-image.png",
-  repo: "https://github.com/uksarkar/gate-js",
+  repo: "https://github.com/uksarkar/access-gate",
 };
 
 export const LOCALE = {
@@ -23,7 +23,7 @@ export const menu_items: { title: string; href: string }[] = [
 
 // Just works with top-level folders and files. For files, don't add extension as it looks for the slug, and not the file name.
 export const side_nav_menu_order: string[] = [
-  "why-gate-js",
+  "why-access-gate",
   "getting-started",
   "core-concepts",
   "api",

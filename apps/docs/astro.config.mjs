@@ -6,9 +6,9 @@ import mdx from "@astrojs/mdx";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://uksarkar.github.io/gate-js",
+  site: "https://uksarkar.github.io/access-gate",
   output: "static",
-  base: '/gate-js/',
+  base: '/access-gate/',
   markdown: {
     smartypants: true,
     syntaxHighlight: "shiki",
