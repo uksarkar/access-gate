@@ -10,6 +10,27 @@ describe("Decision class", () => {
     assert.isFalse(decision.denyDefault().conclusion);
   });
 
+  it("Check getters", () => {
+    const decision = new Decision(
+      [],
+      [],
+      [],
+      undefined,
+      false,
+      false,
+      false,
+      undefined,
+      false,
+      {}
+    );
+
+    assert.isFalse(decision.conclusion);
+    assert.isFalse(decision.hasAction);
+    assert.isFalse(decision.hasPolicy);
+    assert.isFalse(decision.passedDefault);
+    assert.isFalse(decision.isGuardDecision);
+  });
+
   it("Evaluates lazy guards correctly", () => {
     const lazyGuards = [() => undefined, () => true, () => false];
     const decision = new Decision(
