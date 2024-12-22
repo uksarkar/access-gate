@@ -1,3 +1,140 @@
 ---
 title: Gate
 ---
+
+## Introduction
+
+The `Gate` is the foundation of access control in `access-gate`. Think of it as the constitution of your application, containing the rules, guards, and policies that define access permissions. It provides the structure for access control by managing global guards, lazy guards, and policies.
+
+Using the `Gate`, you can create **Representatives**—objects representing entities that are checked for access based on the rules defined in the `Gate`.
+
+## Core Concepts
+
+    1. Building Blocks of Access Control:
+        - A `Gate` is where all guards, lazy guards, and policies are defined.
+        - It acts as the single source of truth for determining access across your application.
+
+    2. Creating Representatives:
+        - A `Representative` is an object built using the Gate to represent a user, system, or entity being evaluated.
+        - Each `Representative` operates independently, allowing you to evaluate multiple entities against the same `Gate`.
+
+    3. Global vs. Policy-Specific Guards:
+        - **Global Guards**: Applied universally to all access evaluations.
+        - Policy Guards: Applied only to specific policies during access checks.
+
+    4. Execution Flow:
+        - Guards and policies in the Gate are evaluated in the following order:
+            1. **Global Guards**: Evaluated when the `Representative` is built.
+            2. **Lazy Guards**: Evaluated during every access (`can()` or `could()`).
+            3. **Policy Guards**: Evaluated during `access()` or `asyncAccess()` calls.
+
+## Using the Gate
+
+### 1. Create a Gate
+
+Define a Gate to manage policies and guards:
+```ts
+import { Gate } from "access-gate";
+
+const gate = new Gate();
+```
+
+### 2. Add Guards
+
+Add global guards to the Gate:
+```ts
+gate.guard((representative) => {
+  if (representative.isAdmin) return true; // Grant access
+  return undefined; // No decision
+});
+
+gate.asyncGuard(async (representative) => {
+  if (!representative.isActive) return false; // Deny access
+  return undefined; // No decision
+});
+```
+### 3. Add Policies
+
+Attach policies to the Gate to group entity-specific access rules:
+```ts
+import { Policy } from "access-gate";
+
+const userPolicy = new Policy("user");
+
+userPolicy.define("create", (representative) => representative.role === "admin");
+userPolicy.define("update", (representative, entity) => {
+  return representative.id === entity.id || representative.role === "admin";
+});
+
+gate.addPolicy(userPolicy);
+```
+
+### 4. Build Representatives
+
+Create Representatives to evaluate specific entities:
+```ts
+const representative1 = gate.build({ id: 1, role: "user", isAdmin: false });
+const representative2 = gate.build({ id: 2, role: "admin", isAdmin: true });
+```
+
+## Evaluating Access
+
+### 1. Basic Access Evaluation
+
+Evaluate access for specific actions on entities:
+```ts
+const access = representative1.access("user", "update");
+
+console.log(access.can({ id: 1 })); // true (self-update allowed)
+console.log(access.can({ id: 2 })); // false (not an admin)
+```
+### 2. Async Access Evaluation
+
+Include asynchronous guards in the evaluation:
+```ts
+const asyncAccess = await representative2.asyncAccess("user", "update");
+console.log(await asyncAccess.could({ id: 1 })); // true (admin can update)
+```
+
+## Detailed Example
+```ts
+import { Gate, Policy } from "access-gate";
+
+// Define a Gate
+const gate = new Gate();
+
+// Define a Policy for Posts
+const postPolicy = new Policy("post");
+
+postPolicy.define("view", () => true); // Everyone can view
+postPolicy.define("edit", (rep, post) => rep.id === post.authorId); // Only owner can edit
+
+// Add Guards
+gate.guard((rep) => (rep.isBanned ? false : undefined)); // Block banned users
+gate.asyncGuard(async (rep) => {
+  return rep.isAdmin ? true : undefined; // Admins can bypass other checks
+});
+
+// Add Policy to Gate
+gate.addPolicy(postPolicy);
+
+// Build Representatives
+const user = gate.build({ id: 1, isAdmin: false, isBanned: false });
+const admin = gate.build({ id: 2, isAdmin: true, isBanned: false });
+
+// Evaluate Access
+console.log(user.access("post", "view").can()); // true
+console.log(user.access("post", "edit").can({ authorId: 1 })); // true
+console.log(user.access("post", "edit").can({ authorId: 2 })); // false
+
+console.log(admin.access("post", "view").can()); // true
+console.log(admin.access("post", "edit").can({ authorId: 2 })); // true (admin override)
+```
+
+## Next Steps
+
+Learn more about related components:
+
+    - [Policy](/access-gate/api/policy): Understand how policies group access controls for specific entities.
+    - [Guards](/access-gate/api/guard): Explore how guards influence decisions at global and policy levels.
+    - [Representative](/acess-gate/api/representative): Dive into how representatives interact with the Gate to evaluate access.
