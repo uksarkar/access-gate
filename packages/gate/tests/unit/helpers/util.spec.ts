@@ -1,5 +1,5 @@
 import { assert, describe, it } from "vitest";
-import { isUndefined } from "../../src/helpers/util";
+import { isUndefined } from "../../../src/helpers/util";
 
 describe("Identify undefined value", () => {
   it("Check primitive undefined values", () => {

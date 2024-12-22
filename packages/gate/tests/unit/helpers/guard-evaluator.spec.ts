@@ -2,7 +2,7 @@ import { assert, describe, it } from "vitest";
 import {
   evaluateAsyncGuards,
   evaluateGuards
-} from "../../src/helpers/guard-evaluator";
+} from "../../../src/helpers/guard-evaluator";
 import { isUndefined } from "src/helpers/util";
 
 const globalGuards = {
