@@ -1,4 +1,10 @@
-import type { AsyncGuard, AsyncLazyGuard, Guard, LazyGuard } from "../types/guard.js";
+import type {
+  AsyncGuard,
+  AsyncLazyGuard,
+  Guard,
+  LazyGuard
+} from "../types/guard.js";
+import { isUndefined } from "./util.js";
 
 type Provider = (name: string, dep: unknown) => void;
 
@@ -21,7 +27,7 @@ export function evaluateGuards<R = unknown, E = unknown>(
 ): boolean | undefined {
   for (const guard of guards) {
     const decision = guard(representative, entity as any, provide as any);
-    if (typeof decision !== "undefined") {
+    if (!isUndefined(decision)) {
       return decision;
     }
   }
@@ -46,7 +52,7 @@ export async function evaluateAsyncGuards<R = unknown, E = unknown>(
 ) {
   for await (const guard of guards) {
     const decision = await guard(representative, entity as any, provide as any);
-    if (typeof decision !== "undefined") {
+    if (!isUndefined(decision)) {
       return decision;
     }
   }

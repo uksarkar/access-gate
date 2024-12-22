@@ -58,7 +58,7 @@ export default class Decision {
     ...args: A[]
   ): Promise<boolean> {
     const lazyGuardDecision = this.getGuardDecision(entity);
-    if (typeof lazyGuardDecision !== "undefined") {
+    if (!isUndefined(lazyGuardDecision)) {
       return lazyGuardDecision;
     }
 
