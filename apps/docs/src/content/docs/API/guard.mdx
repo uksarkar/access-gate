@@ -1,3 +1,164 @@
 ---
 title: Guard
 ---
+
+## Introduction
+
+A guard in **_access-gate_** serves two primary responsibilities:
+
+    1. Providing a Decision:
+        - Guards can either allow, deny, or remain undecided about an action.
+    2. Providing Dependencies:
+        - Guards can inject dependencies that are accessible during access evaluation.
+
+Guards are a powerful mechanism for implementing dynamic, context-aware access control logic.
+## Core Concepts
+
+    ### Order Matters:
+        - Guards are executed in the order they are added.
+        - As soon as a guard provides a definitive decision (`true` or `false`), execution stops, and the decision becomes final.
+
+    ### Sync vs. Async Guards:
+        - Synchronous guards are applied first.
+        - If no decision is reached, asynchronous guards are executed.
+
+    ### Global vs. Lazy Guards:
+        #### Global Guards:
+            - Added at the Gate level.
+            - Applied during the `build()` or` buildAsync()` method execution.
+        #### Lazy Guards:
+            - Evaluated during every `can()` or `could()` method call.
+            - Includes both `lazyGuards` and `asyncLazyGuards`.
+
+    ### Guard Execution Flow:
+        #### During `build()`:
+            - Only global guards (sync and async) are evaluated.
+        #### During `can()` or `could()`:
+            - Lazy guards execute in the following order:
+                1. Global `Gate` lazy guards.
+                2. `Policy`-specific lazy guards.
+                3. Global and policy-specific async lazy guards (only in `could()`).
+
+    ### Policy-Specific Guards:
+        - Guards can be attached to a specific `Policy`.
+        - These are executed during `access()` or `asyncAccess()` calls on the Representative.
+        - Policy lazy guards are merged with the global Gate lazy guards for evaluation in `can()` and `could()`.
+
+## Using Guards
+
+### Global Guards
+
+Add guards at the Gate level:
+
+```ts
+const gate = new Gate();
+
+gate.guard((representative) => {
+  if (representative.isAdmin) return true; // Grant access
+  return undefined; // No decision
+});
+
+gate.asyncGuard(async (representative) => {
+  if (!representative.isActive) return false; // Deny access
+  return undefined; // No decision
+});
+```
+
+### Lazy Guards
+
+Lazy guards are evaluated during `can()` and `could()` calls:
+
+```ts
+gate.lazyGuard((representative, entity) => {
+  if (entity.status === "draft") return false; // Deny access to drafts
+  return undefined; // No decision
+});
+
+gate.asyncLazyGuard(async (representative, entity) => {
+  const isVerified = await checkVerificationStatus(representative.id);
+  return isVerified ? undefined : false; // Deny if not verified
+});
+```
+### Policy-Specific Guards
+
+Attach guards to specific policies:
+
+```ts
+const userPolicy = new Policy("user");
+
+userPolicy.guard((representative) => {
+  if (representative.role === "editor") return true;
+  return undefined;
+});
+
+userPolicy.lazyGuard((representative, entity) => {
+  return representative.id === entity.ownerId ? true : undefined;
+});
+
+userPolicy.asyncLazyGuard(async (representative, entity) => {
+  const isTrusted = await isTrustedUser(representative.id);
+  return isTrusted ? undefined : false;
+});
+```
+
+## Guard Evaluation Example
+```ts
+const representative = { id: 1, role: "admin", isActive: true };
+const post = { id: 101, status: "published", ownerId: 1 };
+
+const gate = new Gate();
+const postPolicy = new Policy("post");
+
+postPolicy.lazyGuard((rep, entity) => entity.ownerId === rep.id);
+
+gate.addPolicy(postPolicy);
+gate.lazyGuard((rep) => (rep.role === "guest" ? false : undefined));
+
+// Build the representative
+const rep = gate.build(representative);
+
+// Access evaluation
+const access = rep.access("post", "view");
+
+// Sync evaluation
+console.log(access.can(post)); // true
+
+// Async evaluation
+console.log(await access.could(post)); // true
+```
+
+## API
+
+### Guard
+```ts
+Guard<T = unknown, D = unknown> = (
+    representative: T,
+    provide: (name: string, dependency: D) => void
+  ) => boolean | undefined;
+```
+
+### LazyGuard
+```ts
+LazyGuard<T = unknown, E = unknown, D = unknown> = (
+  representative: T,
+  entity: E,
+  provide: (name: string, dependency: D) => void
+) => boolean | undefined;
+```
+
+### AsyncGuard
+```ts
+AsyncGuard<T = unknown, D = unknown> = (
+  representative: T,
+  provide: (name: string, dependency: D) => void
+) => Promise<boolean | undefined>;
+```
+
+### AsyncLazyGuard
+```ts
+AsyncLazyGuard<T = unknown, E = unknown, D = unknown> = (
+  representative: T,
+  entity: E,
+  provide: (name: string, dependency: D) => void
+) => Promise<boolean | undefined>;
+```
