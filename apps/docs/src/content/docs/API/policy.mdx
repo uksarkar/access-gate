@@ -1,3 +1,130 @@
 ---
 title: Policy
 ---
+
+## Introduction
+
+A Policy groups entity-specific access controls, such as user, post, comment, video, etc. It allows you to define access restrictions and guards specific to the entity level. Policies simplify managing access controls by organizing related actions and ensuring that entity-specific guards are applied consistently.
+
+In essence, a Policy:
+
+    - Registers a group of access controls (e.g., "create", "edit", "delete" of "post" entity).
+    - Associates guards that apply exclusively to entity-level decisions.
+    - Provides a unified mechanism for evaluating restrictions and guards.
+
+## Core Concepts
+
+    1. Entity-Specific Access Control:
+        - A Policy focuses on a single entity type and organizes actions like "create", "update", "view", etc.
+        - Each action has an associated restriction, defining the conditions under which the action is allowed.
+
+    2. Policy Guards:
+        - Guards attached to a Policy are only evaluated when accessing the entity via Representative.access() or Representative.asyncAccess().
+        - These guards work alongside global guards but apply exclusively to the policy's scope.
+
+    3. Restriction and Guard Interaction:
+        - Policy-level guards are evaluated before applying restrictions.
+        - If a definitive decision is made by a guard (true or false), restrictions are not applied.
+
+    4. Integration with Lazy Guards:
+        - Policy-specific lazy guards (**sync** and **async**) are merged with global lazy guards and evaluated during `can()` or `could()` calls.
+
+## Using Policies
+
+### Creating a Policy
+
+Define a **_Policy_** with a unique name and register actions with restrictions:
+```ts
+import { Policy } from "access-gate";
+
+const userPolicy = new Policy("user");
+
+userPolicy.define("create", (representative) => representative.role === "admin");
+
+userPolicy.define("update", (representative, user) => {
+  return representative.id === user.id || representative.role === "admin";
+});
+```
+
+### Adding Guards to a Policy
+
+Policy guards apply only to the entity associated with the policy:
+```ts
+userPolicy.guard((representative) => {
+  return representative.role !== "banned" ? undefined : false; // Deny any access to the user actions for banned users
+});
+
+userPolicy.lazyGuard((representative, user) => {
+  return representative.id === user.id ? true : undefined; // Allow all access of user actions for the owner
+});
+
+userPolicy.asyncLazyGuard(async (representative, user) => {
+  const isTrusted = await checkTrustLevel(representative.id);
+  return isTrusted ? undefined : false; // Deny any access of the user actions for untrusted users
+});
+```
+
+## Evaluating Access with Policies
+
+Policies are evaluated via a `Representative` created by the `Gate`:
+```ts
+import { Gate } from "access-gate";
+
+const gate = new Gate();
+gate.addPolicy(userPolicy);
+
+const representative = gate.build({ id: 1, role: "user" });
+
+// Access evaluation
+const access = representative.access("user", "update");
+
+// Restriction and guard evaluation
+console.log(access.can({ id: 1 })); // true (owner)
+console.log(access.can({ id: 2 })); // false (not owner)
+```
+
+## Detailed Example
+```ts
+import { Gate, Policy } from "access-gate";
+
+// Define policies
+const postPolicy = new Policy("post");
+
+postPolicy.define("view", () => true); // Always allow viewing
+postPolicy.define("edit", (representative, post) => {
+  return representative.id === post.authorId;
+});
+
+postPolicy.guard((representative) => {
+  return representative.isActive ? undefined : false; // Block inactive users
+});
+
+// Add the policy to a gate
+const gate = new Gate();
+gate.addPolicy(postPolicy);
+
+// Build a representative
+const representative = gate.build({ id: 1, isActive: true });
+
+// Evaluate access
+const access = representative.access("post", "edit");
+
+// Check decision
+console.log(access.can({ authorId: 1 })); // true
+console.log(access.can({ authorId: 2 })); // false
+```
+
+## Policy-Level Guard Execution Flow
+
+    1. **Global Guards**: Evaluated first during **build()** or **buildAsync()** on the Gate.
+    2. **Policy Guards**: Evaluated during **access()** or **asyncAccess()** calls.
+    3. **Lazy Guards**: Merged with global lazy guards and executed during **can()** or **could()** calls:
+        - **Order**: Global lazy guards → Policy lazy guards → Global async lazy guards → Policy async lazy guards.
+
+## Next Steps
+
+Learn more about how policies interact with other components:
+
+    - [Guards](/access-gate/api/guard): Deep dive into guard behavior and execution flow.
+    - [Representative](/access-gate/api/representative): Understand how policies influence entity access.
+    - [Decision](/access-gate/api/decision): Explore how guards and restrictions contribute to the final access decision.
