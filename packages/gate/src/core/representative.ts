@@ -40,15 +40,14 @@ export class Representative<
     const guardDecision = this.getGuardDecision(foundPolicy);
 
     // break the chain if already have any decision
-    // or no policy found
-    if ((guardDecision && !isUndefined(guardDecision[0])) || !foundPolicy) {
+    if (!isUndefined(guardDecision?.[0])) {
       return this.constructDecision(foundPolicy, action, guardDecision);
     }
 
     let [decision, dep] = await foundPolicy.getAsyncGuardDecision(this.entity);
     return this.constructDecision(foundPolicy, action, [
       decision,
-      { ...((guardDecision && guardDecision[1]) || {}), ...dep }
+      { ...(guardDecision?.[1] || {}), ...dep }
     ]);
   }
 
@@ -81,7 +80,7 @@ export class Representative<
       false,
       policy?.actions[action],
       undefined,
-      { ...this._dependencies, ...((guardDecision && guardDecision[1]) || {}) }
+      { ...this._dependencies, ...(guardDecision?.[1] || {}) }
     );
   }
 

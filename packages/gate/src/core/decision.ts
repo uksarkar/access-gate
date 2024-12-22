@@ -13,7 +13,7 @@ export default class Decision {
     private _lazy_guards: LazyGuard[],
     private _lazy_async_guards: AsyncLazyGuard[],
     private readonly _representative: unknown,
-    private _conclusion: boolean,
+    private _conclusion: boolean | undefined,
     private _allow_default: boolean,
     private _has_policy: boolean,
     private _is_guard_decision: boolean,
@@ -48,6 +48,7 @@ export default class Decision {
   public can<T = unknown, A = unknown>(entity?: T, ...args: A[]): boolean {
     const lazyGuardDecision = this.getGuardDecision(entity);
     if (!isUndefined(lazyGuardDecision)) {
+      this._conclusion = lazyGuardDecision;
       return lazyGuardDecision;
     }
     return this.applyRestriction(entity, args);
@@ -59,6 +60,7 @@ export default class Decision {
   ): Promise<boolean> {
     const lazyGuardDecision = this.getGuardDecision(entity);
     if (!isUndefined(lazyGuardDecision)) {
+      this._conclusion = lazyGuardDecision;
       return lazyGuardDecision;
     }
 
@@ -71,6 +73,7 @@ export default class Decision {
       }
     );
     if (!isUndefined(lazyAsyncGuardDecision)) {
+      this._conclusion = lazyAsyncGuardDecision;
       return lazyAsyncGuardDecision;
     }
 
