@@ -1,3 +1,113 @@
 ---
 title: Representative
 ---
+## Introduction
+
+A Representative is the instance of your application's `Gate` rules, prepared to evaluate access for a specific entity. It represents a context-aware object that interacts with the `Gate`, policies, and guards to determine access permissions in real-time.
+
+The Representative enables detailed and isolated access evaluations for specific users, systems, or entities against the policies and rules defined in the `Gate`.
+## Core Concepts
+
+    ### 1. Instance of Rules and Policies:
+        - A Representative is created using the `Gate`, binding the rules, guards, and policies to a specific entity.
+        - This allows targeted access checks for individual entities, such as users or systems.
+
+    ### 2. Prepared Access Evaluation:
+        - The Representative consolidates and optimizes guard and policy evaluation for the entity it represents.
+
+    ### 3. Real-Time Decision Making:
+        - Access checks can be performed synchronously (`can()`) or asynchronously (`could()`).
+        - Guards and restrictions are evaluated in sequence, with the first definitive decision (`true` or `false`) halting further checks.
+
+    ### 4. Policy-Specific Access:
+        - The Representative interacts with the `Gate` to evaluate policy-level guards and restrictions for the entity.
+
+    ### 5. Global Guard Preprocessing:
+        - When the Representative is created, global guards are evaluated to establish a baseline decision for the entity.
+
+## Creating a Representative
+
+To create a Representative, you use the `Gate`'s `build()` or `buildAsync()` methods, passing in the entity to be evaluated.
+```ts
+import { Gate } from "access-gate";
+
+const gate = new Gate();
+
+// Add global guards
+gate.guard((rep) => (rep.isBanned ? false : undefined));
+
+// Build a Representative for a specific user
+const representative = gate.build({ id: 1, isBanned: false });
+
+// The Representative is now ready for access evaluations
+```
+## Evaluating Access
+### Access a Policy
+
+Evaluate synchronous guards and restrictions for a specific action within a policy:
+```ts
+const access = representative.access("user", "update");
+console.log(access.can({ id: 1 })); // true or false
+```
+
+### Async Access Evaluation
+
+Include asynchronous guards in the evaluation:
+```ts
+const asyncAccess = await representative.asyncAccess("user", "update");
+console.log(await asyncAccess.could({ id: 1 })); // true or false
+```
+
+## Detailed Example
+```ts
+import { Gate, Policy } from "access-gate";
+
+// Define policies
+const userPolicy = new Policy("user");
+userPolicy.define("update", (rep, user) => rep.id === user.id); // Users can update their own data
+userPolicy.guard((rep) => (rep.isAdmin ? undefined : false)); // Admins are prioritized
+
+// Add the policy to the Gate
+const gate = new Gate();
+gate.addPolicy(userPolicy);
+
+// Build Representatives for specific users
+const admin = gate.build({ id: 1, isAdmin: true, isBanned: false });
+const regularUser = gate.build({ id: 2, isAdmin: false, isBanned: false });
+const bannedUser = gate.build({ id: 3, isAdmin: false, isBanned: true });
+
+// Evaluate access for an admin
+const adminAccess = admin.access("user", "update");
+console.log(adminAccess.can({ id: 2 })); // true (admins can update any user)
+
+// Evaluate access for a regular user
+const userAccess = regularUser.access("user", "update");
+console.log(userAccess.can({ id: 2 })); // true (can update their own data)
+console.log(userAccess.can({ id: 3 })); // false (cannot update others' data)
+
+// Evaluate access for a banned user
+const bannedAccess = bannedUser.access("user", "update");
+console.log(bannedAccess.can({ id: 3 })); // false (banned users cannot access)
+```
+
+## Guard Evaluation Flow
+
+    1. During Representative Creation (`build` or `buildAsync`):
+        - Global guards are evaluated immediately.
+        - If a definitive decision is reached, it applies universally across all policies.
+
+    2. During Policy Access (access or asyncAccess):
+        - Policy-specific guards are evaluated.
+        - Lazy guards (global and policy-specific) are merged and executed during `can()` or `could()` calls:
+            1. Global lazy guards.
+            2. Policy-specific lazy guards.
+            3. Global async lazy guards.
+            4. Policy-specific async lazy guards.
+
+## Next Steps
+
+Explore how the Representative interacts with other components:
+
+    - [Gate](/access-gate/api/gate): The centralized structure for managing guards and policies.
+    - [Policy](/access-gate/api/policy): Group entity-specific access controls with restrictions and guards.
+    - [Decision](/access-gate/api/decision): The final result of access evaluations.
