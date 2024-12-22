@@ -1,3 +1,125 @@
 ---
 title: Decision
 ---
+
+## Introduction
+
+The `Decision` class is where everything comes together. It acts as the final evaluation point for access control. Once all the necessary elements—guards, policies, and the representative—are prepared, the `Decision` object performs the actual access check.
+
+With `Decision`, you can:
+
+    - Check if a Representative has access to a specific action on an entity.
+    - Evaluate synchronous (`can()`) or asynchronous (`could()`) guards and restrictions.
+    - Access additional metadata like whether the policy or action exists and the overall conclusion of the access evaluation.
+
+## Core Concepts
+
+    ### Unified Evaluation:
+        - Combines all the necessary components (guards, policies, representative, and entity) to perform the access check.
+
+    ### Synchronous vs. Asynchronous Checks:
+        - can(): Evaluates synchronous guards and restrictions.
+        - could(): Includes asynchronous guards in the evaluation.
+
+    ### Additional Metadata:
+        #### Provides useful flags like:
+            - Whether a policy exists.
+            - Whether the action exists within the policy.
+            - Whether a global or policy guard provided a definitive decision.
+        #### Use conclusion to fetch the final decision after the `can()` or `could()` evaluation.
+
+    ### Lazy Guards:
+        - Lazy guards (`sync` and `async`) are evaluated during the `can()` and `could()` calls. This allows for dynamic, runtime access decisions.
+
+## Creating a `Decision`
+
+A `Decision` object is typically created internally when you call `access()` or `asyncAccess()` on a Representative.
+
+```ts
+const representative = gate.build({ id: 1 });
+const decision = representative.access("user", "update");
+```
+
+## Using the Decision API
+
+    1. Check Access with `can()`: Perform a synchronous access check:
+    ```ts
+    console.log(decision.can({ id: 1 })); // true or false
+    ```
+    2. Check Access with `could()`: Perform an asynchronous access check (includes async guards):
+    ```ts
+    console.log(await decision.could({ id: 1 })); // true or false
+    ```
+    3. Access Metadata: Use flags and getters to retrieve additional information about the decision:
+    ```ts
+    console.log(decision.hasPolicy); // true (if the policy exists)
+    console.log(decision.hasAction); // true (if the action exists in the policy)
+    console.log(decision.isGuardDecision); // true (if guards provided a definitive decision)
+    console.log(decision.conclusion); // true or false (final decision after evaluation)
+    ```
+## Detailed Example
+```ts
+import { Gate, Policy } from "access-gate";
+
+// Define policies
+const userPolicy = new Policy("user");
+userPolicy.define("update", (rep, user) => rep.id === user.id); // Users can update their own data
+userPolicy.guard((rep) => (rep.isActive ? undefined : false)); // Inactive users cannot access
+
+const gate = new Gate();
+gate.addPolicy(userPolicy);
+
+// Build a representative
+const representative = gate.build({ id: 1, isActive: true });
+
+// Access evaluation
+const decision = representative.access("user", "update");
+
+// Perform checks
+console.log(decision.can({ id: 1 })); // true (user can update their own data)
+console.log(decision.can({ id: 2 })); // false (user cannot update others' data)
+
+// Check metadata
+console.log(decision.hasPolicy); // true
+console.log(decision.hasAction); // true
+console.log(decision.isGuardDecision); // false (guards did not provide a definitive decision)
+console.log(decision.conclusion); // true (final decision after evaluation)
+```
+
+## Decision Evaluation Flow
+
+    ### Global Guard Decision:
+        - If a definitive decision (true or false) is made by a global guard, it overrides all other checks.
+
+    ### Policy Guards:
+        - Policy-specific guards are evaluated next during access() or asyncAccess().
+
+    ### Lazy Guards:
+        - Evaluated dynamically during can() or could() calls.
+        - Includes both global and policy-specific lazy guards.
+
+    ### Restrictions:
+        - If no definitive decision is made by guards, restrictions are applied based on the defined rules for the action.
+
+### Key Properties and Methods
+
+    1. `can(entity)`:
+        - Evaluates synchronous guards and restrictions for the given entity.
+        - Returns a boolean (`true` or `false`).
+
+    2. `could(entity)`:
+        - Evaluates both synchronous and asynchronous guards for the given entity.
+        - Returns a `Promise<boolean>`.
+
+    3. `conclusion`:
+        - Provides the final decision after `can()` or `could()` is called.
+        - Reflects the overall result of the evaluation.
+
+    4. `hasPolicy`:
+        - Indicates whether the policy exists for the evaluated action.
+
+    5. `hasAction`:
+        - Indicates whether the action exists within the evaluated policy.
+
+    6. `isGuardDecision`:
+        - Indicates whether the decision was made solely by a guard.
