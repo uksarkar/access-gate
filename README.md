@@ -9,6 +9,8 @@ A powerful and flexible role-based access control (RBAC) library for modern Java
 - **Lightweight**: Minimal dependencies, fast performance.
 - **TypeScript Support**: Fully typed API for improved developer experience.
 
+For full [Documentation](https://uksarkar.github.io/access-gate/).
+
 ## Installation
 
 Install the package via npm or yarn:
@@ -123,8 +125,6 @@ gate.guard((user, provide) => {
   const role = getRole(user);
 
   provide("role", role);
-
-  return role === "admin";
 });
 
 // inject
