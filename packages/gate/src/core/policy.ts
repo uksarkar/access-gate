@@ -17,7 +17,12 @@ export class Policy<T extends string> extends GuardContainer {
    */
   public define<E = unknown, R = unknown, Arg = unknown>(
     action: T,
-    restriction: (representative: R, entity: E, ...args: Arg[]) => boolean
+    restriction: (
+      this: { inject: <D>(name: string) => D },
+      representative: R,
+      entity: E,
+      ...args: Arg[]
+    ) => boolean
   ) {
     this._actions[action] = restriction as any;
   }

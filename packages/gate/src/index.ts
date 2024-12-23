@@ -11,7 +11,14 @@ export const createPolicy = <
   Arg = unknown
 >(
   name: string,
-  actions: Record<T, (representative: R, entity: E, ...args: Arg[]) => boolean>
+  actions: {
+    [K in T]: (
+      this: { inject: <D>(name: string) => D },
+      representative: R,
+      entity: E,
+      ...args: Arg[]
+    ) => boolean;
+  }
 ): Policy<T> => {
   const policy = new Policy<T>(name);
   Object.entries(actions).forEach(([action, restriction]) =>
