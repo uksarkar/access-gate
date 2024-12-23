@@ -22,7 +22,7 @@ export class Representative<
     return this._guard_decision;
   }
 
-  public access<K extends keyof P, A extends P[K][number]>(
+  public access<K extends Extract<keyof P, string>, A extends P[K][number]>(
     policy: K,
     action: A
   ) {
@@ -32,10 +32,10 @@ export class Representative<
     return this.constructDecision(foundPolicy, action, guardDecision);
   }
 
-  public async asyncAccess<K extends keyof P, A extends P[K][number]>(
-    policy: K,
-    action: A
-  ) {
+  public async asyncAccess<
+    K extends Extract<keyof P, string>,
+    A extends P[K][number]
+  >(policy: K, action: A) {
     const foundPolicy = this.gate.policies[policy];
     const guardDecision = this.getGuardDecision(foundPolicy);
 
@@ -51,9 +51,12 @@ export class Representative<
     ]);
   }
 
-  private constructDecision(
-    policy: Policy<string> | undefined,
-    action: string,
+  private constructDecision<
+    K extends Extract<keyof P, string>,
+    A extends P[K][number]
+  >(
+    policy: Policy<K, A> | undefined,
+    action: A,
     guardDecision: ReturnType<typeof this.getGuardDecision>
   ) {
     if (guardDecision && !isUndefined(guardDecision[0])) {
@@ -84,8 +87,11 @@ export class Representative<
     );
   }
 
-  private getGuardDecision(
-    policy?: Policy<string>
+  private getGuardDecision<
+    K extends Extract<keyof P, string>,
+    A extends P[K][number]
+  >(
+    policy?: Policy<K, A>
   ):
     | undefined
     | [boolean | undefined]

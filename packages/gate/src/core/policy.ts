@@ -1,11 +1,11 @@
 import { GuardContainer } from "./guard-registry.js";
 
-export class Policy<T extends string> extends GuardContainer {
-  private _actions: Record<T, <Arg>(...args: Arg[]) => boolean>;
+export class Policy<T extends string, A extends string> extends GuardContainer {
+  private _actions: Record<A, <Arg>(...args: Arg[]) => boolean>;
 
-  constructor(public readonly name: string) {
+  constructor(public readonly name: T) {
     super();
-    this._actions = {} as Record<T, <Arg>(...args: Arg[]) => boolean>;
+    this._actions = {} as Record<A, <Arg>(...args: Arg[]) => boolean>;
   }
 
   public get actions() {
@@ -16,7 +16,7 @@ export class Policy<T extends string> extends GuardContainer {
    * define
    */
   public define<E = unknown, R = unknown, Arg = unknown>(
-    action: T,
+    action: A,
     restriction: (
       this: { inject: <D>(name: string) => D },
       representative: R,
