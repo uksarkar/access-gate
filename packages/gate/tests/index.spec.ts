@@ -1,3 +1,4 @@
+import { PolicyActionMapTuple } from "src/types/action";
 import { createPolicy, Gate } from "../src/index";
 import { it, describe, assert } from "vitest";
 
@@ -12,7 +13,7 @@ interface Plan {
 }
 
 interface Post {
-  id: number;
+  id?: number;
   authorId: number;
 }
 
@@ -23,11 +24,16 @@ interface Video {
   authorId: number;
 }
 
+type PostPolicy = {
+  update: PolicyActionMapTuple<User, Post>;
+  delete: PolicyActionMapTuple<User>;
+};
+
 describe("RBAC", () => {
-  const gate = new Gate();
+  const gate = new Gate<{ post: PostPolicy }>();
 
   // polices
-  const postPolicy = createPolicy("post", {
+  const postPolicy = createPolicy<PostPolicy, "post">("post", {
     update: (user: User, post: Post) => {
       return user.role.includes("admin") || user.id === post?.authorId;
     },
