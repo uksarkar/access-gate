@@ -1,61 +1,51 @@
 import { Policy } from "./core/policy.js";
+import { PolicyAction, PolicyActionMap } from "./types/action.js";
 
 export * from "./core/gate.js";
 export * from "./core/policy.js";
 export * from "./types/guard.js";
+export * from "./types/action";
 
 /**
- * Creates a new instance of the `Policy` class.
- * 
- * This utility function simplifies the process of creating a policy by allowing
- * you to define a set of actions and their corresponding restrictions in a single step.
- * The resulting policy can then be added directly to a `Gate`.
+ * A utility function to create a new `Policy` object without directly using the `Policy` class.
+ * This provides a more concise and type-safe way to define policies.
  *
- * @template T - A string representing the entity name (e.g., "user", "post").
- * @template A - A string union representing the action names (e.g., "create", "update").
- * @template E - The entity type the policy applies to (default: `unknown`).
- * @template R - The representative type (default: `unknown`).
- * @template Arg - Additional argument types for the restriction functions (default: `unknown`).
+ * @template T - A string representing the name of the policy.
+ * @template ActionMap - A map of actions representing the policy's behavior.
  *
- * @param name - The name of the policy (e.g., "user", "post").
- * @param actions - An object defining actions and their corresponding restrictions.
- *                  Each restriction is a function that takes:
- *                  - `representative`: The representative being evaluated.
- *                  - `entity`: The entity the action applies to.
- *                  - `...args`: Additional arguments specific to the action.
- *                  The restriction function returns a boolean indicating whether
- *                  the action is allowed (`true`) or denied (`false`).
+ * @param name - The name of the policy, typically a string identifier.
+ * @param actions - An object mapping action keys to their corresponding `PolicyAction` definitions.
+ *                  Each key in `actions` corresponds to a policy action described by the `ActionMap`.
  *
- * @returns A new instance of the `Policy<T, A>` class that can be added to a `Gate<{[k: T]: A}>`.
+ * @returns A new `Policy` object initialized with the provided name and actions.
  *
  * @example
- * const userPolicy = createPolicy("user", {
- *   create: (rep) => rep.role === "admin",
- *   update: (rep, user) => rep.id === user.id || rep.role === "admin"
+ * type PostPolicy = {
+ *   update: PolicyActionMapTuple<User, Post>;
+ *   delete: PolicyActionMapTuple<User>;
+ * };
+ *
+ * const gate = new Gate<{ post: PostPolicy }>();
+ *
+ * // Define policies
+ * const postPolicy = createPolicy<PostPolicy, "post">("post", {
+ *   update: (user: User, post: Post) => {
+ *     return user.role.includes("admin") || user.id === post?.authorId;
+ *   },
+ *   delete: (user: User) => {
+ *     return user.role.includes("admin");
+ *   }
  * });
- * 
- * gate.addPolicy(userPolicy);
+ *
+ * // Register the policy with the gate
+ * gate.addPolicy("post", postPolicy);
  */
 export const createPolicy = <
-  T extends string,
-  A extends string,
-  E = unknown,
-  R = unknown,
-  Arg = unknown
+  ActionMap extends PolicyActionMap<any, any, any, any>,
+  T extends string
 >(
   name: T,
-  actions: {
-    [K in A]: (
-      this: { inject: <D>(name: string) => D },
-      representative: R,
-      entity: E,
-      ...args: Arg[]
-    ) => boolean;
-  }
-): Policy<T, A> => {
-  const policy = new Policy<T, A>(name);
-  Object.entries(actions).forEach(([action, restriction]) =>
-    policy.define(action as A, restriction as any)
-  );
-  return policy;
+  actions: { [K in keyof ActionMap]: PolicyAction<ActionMap[K]> }
+): Policy<ActionMap, T> => {
+  return new Policy<ActionMap, T>(name, actions);
 };
