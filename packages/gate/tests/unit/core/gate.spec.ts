@@ -2,11 +2,15 @@ import { assert, describe, it } from "vitest";
 import { Gate } from "../../../src/core/gate";
 import { Policy } from "../../../src/core/policy";
 import { Representative } from "../../../src/core/representative";
+import { DefinePolicyActions, PolicyActionMapTuple } from "src/types/action";
 
 describe("Gate class", () => {
   type MockPolicies = {
-    user: ["create", "update", "delete"];
-    post: ["view", "edit", "delete"];
+    user: DefinePolicyActions<
+      ["create", "update", "delete"],
+      PolicyActionMapTuple
+    >;
+    post: DefinePolicyActions<["view", "edit", "delete"], PolicyActionMapTuple>;
   };
 
   it("Adds and retrieves policies", () => {

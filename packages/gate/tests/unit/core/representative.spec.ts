@@ -2,6 +2,7 @@ import { assert, describe, it } from "vitest";
 import { Representative } from "../../../src/core/representative";
 import { Policy } from "../../../src/core/policy";
 import { Gate } from "../../../src/core/gate";
+import { PolicyActionMapTuple } from "src/types/action";
 
 describe("Representative class", () => {
   // Mock Gate
@@ -13,7 +14,7 @@ describe("Representative class", () => {
       },
       lazyGuards: [],
       asyncLazyGuards: []
-    } as unknown as Gate<Record<string, string[]>>;
+    } as unknown as Gate<{ user: { view: PolicyActionMapTuple }; post: {} }>;
 
     return gate;
   };

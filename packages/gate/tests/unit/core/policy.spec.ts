@@ -1,31 +1,38 @@
 import { assert, describe, it } from "vitest";
 import { Policy } from "../../../src/core/policy";
+import { PolicyActionMapTuple } from "src/types/action";
 
 describe("Policy class", () => {
   it("Define policy", () => {
-    const policy = new Policy("user");
+    const policy = new Policy<
+      {
+        update: PolicyActionMapTuple<number, number>;
+        view: PolicyActionMapTuple<number, number>;
+      },
+      "user"
+    >("user");
 
     assert.equal(policy.name, "user");
 
     policy.define("update", () => true);
 
-    assert.isTrue(policy.actions.update?.());
+    assert.isTrue((policy.actions.update as unknown as Function)?.());
     assert.isTrue("update" in policy.actions);
 
     policy.define("view", (a, b) => a === b);
 
-    assert.isTrue(policy.actions.view?.(200, 200));
-    assert.isFalse(policy.actions.view?.("200", 200 as any));
+    assert.isTrue((policy.actions.view as unknown as Function)?.(200, 200));
+    assert.isFalse((policy.actions.view as unknown as Function)?.("200", 200));
   });
 
   it("Overwrites action definitions", () => {
-    const policy = new Policy("user");
+    const policy = new Policy<{ view: PolicyActionMapTuple }, "user">("user");
 
     policy.define("view", () => true);
-    assert.isTrue(policy.actions.view?.());
+    assert.isTrue((policy.actions.view as unknown as Function)?.());
 
     policy.define("view", () => false); // Overwrite
-    assert.isFalse(policy.actions.view?.());
+    assert.isFalse((policy.actions.view as unknown as Function)?.());
   });
 
   it("Guards are evaluated in order", () => {
@@ -51,10 +58,10 @@ describe("Policy class", () => {
   });
 
   it("Policy guards", async () => {
-    const policy = new Policy("post");
+    const policy = new Policy<{ update: PolicyActionMapTuple }, "post">("post");
 
     policy.define("update", () => true);
-    assert.isTrue(policy.actions.update?.());
+    assert.isTrue((policy.actions.update as unknown as Function)?.());
 
     policy.guard(() => false);
     assert.deepEqual(policy.getGuardDecision({}), [false, {}]);

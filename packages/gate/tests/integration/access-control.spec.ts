@@ -15,10 +15,7 @@ interface Entity {
 
 describe("Access Control Integration Test", () => {
   it("Allows access for a user with proper guards and policies", async () => {
-    const gate = new Gate<{
-      user: ["create", "update"];
-      post: ["view", "edit"];
-    }>();
+    const gate = new Gate();
 
     // Define policies
     const userPolicy = new Policy("user");
