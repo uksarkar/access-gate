@@ -1,3 +1,4 @@
+import { PolicyAction, PolicyActionMapTuple } from "src/types/action.js";
 import {
   evaluateAsyncGuards,
   evaluateGuards
@@ -5,7 +6,7 @@ import {
 import { isUndefined } from "../helpers/util.js";
 import type { AsyncLazyGuard, LazyGuard } from "../types/guard.js";
 
-export default class Decision {
+export default class Decision<T extends PolicyActionMapTuple> {
   private readonly _has_action: boolean;
   private _dependencies: Record<string, unknown>;
 
@@ -17,7 +18,7 @@ export default class Decision {
     private _allow_default: boolean,
     private _has_policy: boolean,
     private _is_guard_decision: boolean,
-    private readonly restriction?: <Arg>(...args: Arg[]) => boolean,
+    private readonly restriction?: PolicyAction<T>,
     hasAction?: boolean,
     dependencies?: Record<string, unknown>
   ) {
@@ -45,7 +46,7 @@ export default class Decision {
     return this._is_guard_decision;
   }
 
-  public can<T = unknown, A = unknown>(entity?: T, ...args: A[]): boolean {
+  public can(entity?: T[1], ...args: T[2][]): boolean {
     const lazyGuardDecision = this.getGuardDecision(entity);
     if (!isUndefined(lazyGuardDecision)) {
       this._conclusion = lazyGuardDecision;
@@ -54,10 +55,7 @@ export default class Decision {
     return this.applyRestriction(entity, args);
   }
 
-  public async could<T = unknown, A = unknown>(
-    entity?: T,
-    ...args: A[]
-  ): Promise<boolean> {
+  public async could(entity?: T[1], ...args: T[2][]): Promise<boolean> {
     const lazyGuardDecision = this.getGuardDecision(entity);
     if (!isUndefined(lazyGuardDecision)) {
       this._conclusion = lazyGuardDecision;

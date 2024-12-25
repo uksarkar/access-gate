@@ -2,14 +2,15 @@ import Decision from "./decision.js";
 import type { Gate } from "./gate.js";
 import { isUndefined } from "../helpers/util.js";
 import { Policy } from "./policy.js";
+import { PolicyActionMap } from "src/types/action.js";
 
 export class Representative<
-  P extends Record<string, string[]>,
-  T extends unknown
+  R extends unknown,
+  P extends Record<string, PolicyActionMap<R, any, any, any>>
 > {
   public constructor(
     private readonly gate: Gate<P>,
-    private readonly entity: T,
+    private readonly entity: R,
     private _guard_decision: boolean | undefined,
     private _dependencies: Record<string, unknown>
   ) {}
@@ -22,7 +23,7 @@ export class Representative<
     return this._guard_decision;
   }
 
-  public access<K extends Extract<keyof P, string>, A extends P[K][number]>(
+  public access<K extends Extract<keyof P, string>, A extends keyof P[K]>(
     policy: K,
     action: A
   ) {
@@ -34,7 +35,7 @@ export class Representative<
 
   public async asyncAccess<
     K extends Extract<keyof P, string>,
-    A extends P[K][number]
+    A extends keyof P[K]
   >(policy: K, action: A) {
     const foundPolicy = this.gate.policies[policy];
     const guardDecision = this.getGuardDecision(foundPolicy);
@@ -53,14 +54,14 @@ export class Representative<
 
   private constructDecision<
     K extends Extract<keyof P, string>,
-    A extends P[K][number]
+    A extends keyof P[K]
   >(
-    policy: Policy<K, A> | undefined,
+    policy: Policy<P[K], K> | undefined,
     action: A,
     guardDecision: ReturnType<typeof this.getGuardDecision>
   ) {
     if (guardDecision && !isUndefined(guardDecision[0])) {
-      return new Decision(
+      return new Decision<P[K][A]>(
         [],
         [],
         undefined,
@@ -73,7 +74,7 @@ export class Representative<
       );
     }
 
-    return new Decision(
+    return new Decision<P[K][A]>(
       [...this.gate.lazyGuards, ...(policy?.lazyGuards || [])],
       [...this.gate.asyncLazyGuards, ...(policy?.asyncLazyGuards || [])],
       this.entity,
@@ -87,11 +88,8 @@ export class Representative<
     );
   }
 
-  private getGuardDecision<
-    K extends Extract<keyof P, string>,
-    A extends P[K][number]
-  >(
-    policy?: Policy<K, A>
+  private getGuardDecision<K extends Extract<keyof P, string>>(
+    policy?: Policy<P[K], K>
   ):
     | undefined
     | [boolean | undefined]

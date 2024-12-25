@@ -1,11 +1,17 @@
+import type { PolicyAction, PolicyActionMap } from "src/types/action.js";
 import { GuardContainer } from "./guard-registry.js";
 
-export class Policy<T extends string, A extends string> extends GuardContainer {
-  private _actions: Record<A, <Arg>(...args: Arg[]) => boolean>;
-
-  constructor(public readonly name: T) {
+export class Policy<
+  ActionMap extends PolicyActionMap<any, any, any, any>,
+  T extends string
+> extends GuardContainer {
+  constructor(
+    public readonly name: T,
+    private _actions: Partial<{
+      [K in keyof ActionMap]: PolicyAction<ActionMap[K]>;
+    }> = {}
+  ) {
     super();
-    this._actions = {} as Record<A, <Arg>(...args: Arg[]) => boolean>;
   }
 
   public get actions() {
@@ -13,18 +19,13 @@ export class Policy<T extends string, A extends string> extends GuardContainer {
   }
 
   /**
-   * define
+   * Define an action with a restriction.
    */
-  public define<E = unknown, R = unknown, Arg = unknown>(
-    action: A,
-    restriction: (
-      this: { inject: <D>(name: string) => D },
-      representative: R,
-      entity: E,
-      ...args: Arg[]
-    ) => boolean
+  public define<K extends keyof ActionMap>(
+    action: K,
+    restriction: PolicyAction<ActionMap[K]>
   ) {
-    this._actions[action] = restriction as any;
+    this._actions[action] = restriction;
   }
 
   public getGuardDecision(representative: unknown) {
